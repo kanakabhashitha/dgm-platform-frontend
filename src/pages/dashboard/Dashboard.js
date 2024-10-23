@@ -187,7 +187,7 @@ const Dashboard = () => {
             <p className="text-base font-normal tracking-wider text-gray-700 capitalize">
               device failures
             </p>
-            <span className="text-4xl font-semibold text-black">0</span>
+            <span className="text-4xl font-semibold text-black">6</span>
           </div>
         </div>
 
