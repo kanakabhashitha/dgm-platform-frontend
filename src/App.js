@@ -1,24 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import {
+  SharedLayout,
+  Alarms,
+  Dashboard,
+  Reports,
+  GroupManagement,
+  RealTimeMonitoring,
+} from "./pages/dashboard/index";
+import Login from "./pages/Login";
+import ProtectedRoute from "./pages/ProtectedRoute";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <SharedLayout />
+            </ProtectedRoute>
+          }
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <Route index="dashboard" element={<Dashboard />} />
+          <Route path="real-time-monitoring" element={<RealTimeMonitoring />} />
+          <Route path="alarms" element={<Alarms />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="group-management" element={<GroupManagement />} />
+        </Route>
+        <Route path="login" element={<Login />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
