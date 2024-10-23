@@ -15,9 +15,13 @@ function RealTimeMonitoring() {
 
   useEffect(() => {
     dispatch(loadRealTimeData());
-  }, [dispatch]);
 
-  useEffect(() => {}, [realTimeData]);
+    const intervalId = setInterval(() => {
+      dispatch(loadRealTimeData());
+    }, 20000);
+
+    return () => clearInterval(intervalId);
+  }, [dispatch]);
 
   if (loading) {
     return <div>Loading...</div>;

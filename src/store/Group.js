@@ -20,7 +20,7 @@ const groupSlice = createSlice({
       state.error = action.payload.error;
     },
     getGroup: (state, action) => {
-      state.groups = action.payload;
+      state.groups = action.payload.data;
       state.loading = false;
       state.error = null;
     },

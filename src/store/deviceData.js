@@ -5,6 +5,11 @@ const initialState = {
   loading: false,
   error: null,
   realTimeData: [],
+  historicalData: [],
+  currentPage: 1,
+  itemsPerPage: 10,
+  totalItems: 0,
+  totalPages: 0,
 };
 
 const deviceDataSlice = createSlice({
@@ -20,15 +25,28 @@ const deviceDataSlice = createSlice({
       state.error = action.payload.error;
     },
     getRealTimeData: (state, action) => {
-      state.realTimeData = action.payload;
+      state.realTimeData = action.payload.data;
+      state.loading = false;
+      state.error = null;
+    },
+    getHistoricalData: (state, action) => {
+      state.historicalData = action.payload.data;
+      state.currentPage = action.payload.pagination.currentPage;
+      state.itemsPerPage = action.payload.pagination.itemsPerPage;
+      state.totalItems = action.payload.pagination.totalItems;
+      state.totalPages = action.payload.pagination.totalPages;
       state.loading = false;
       state.error = null;
     },
   },
 });
 
-export const { apiRequested, apiRequestFailed, getRealTimeData } =
-  deviceDataSlice.actions;
+export const {
+  apiRequested,
+  apiRequestFailed,
+  getRealTimeData,
+  getHistoricalData,
+} = deviceDataSlice.actions;
 export default deviceDataSlice.reducer;
 
 const url = "/data";
@@ -39,5 +57,14 @@ export const loadRealTimeData = () =>
     method: "GET",
     onStart: apiRequested.type,
     onSuccess: getRealTimeData.type,
+    onError: apiRequestFailed.type,
+  });
+
+export const loadHistoricalData = (pageNumber, pageSize) =>
+  apiCallBegan({
+    url: `${url}/all-values?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+    method: "GET",
+    onStart: apiRequested.type,
+    onSuccess: getHistoricalData.type,
     onError: apiRequestFailed.type,
   });

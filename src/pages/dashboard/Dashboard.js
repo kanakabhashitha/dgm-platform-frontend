@@ -1,12 +1,88 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+import { useDispatch, useSelector } from "react-redux";
+import { loadHistoricalData } from "../../store/deviceData";
 import { LineChart, DoughnutChart } from "../../components/index";
 
 import { RiGroup3Line, RiBaseStationLine } from "react-icons/ri";
 import { MdSensors, MdSensorsOff } from "react-icons/md";
 import { LuBellRing } from "react-icons/lu";
 
+import { SensorData, DeviceData } from "../../utils/chartData";
+
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const { historicalData, totalPages, itemsPerPage, loading, error } =
+    useSelector((state) => state.device);
+
   const [activeButton, setActiveButton] = useState("daily");
+  const [criticalCount, setCriticalCount] = useState(0);
+  const [warningCount, setWarningCount] = useState(0);
+  const [sensorFaultCount, setSensorFaultCount] = useState(0);
+  const [needCalibrateCount, setNeedCalibrateCount] = useState(0);
+  const [warmupCount, setWarmupCount] = useState(0);
+
+  useEffect(() => {
+    fetchAllData();
+
+    // const intervalId = setInterval(() => {
+    //   dispatch(loadHistoricalData(1, 50));
+    // }, 20000);
+
+    // return () => clearInterval(intervalId);
+  }, [dispatch, totalPages]);
+
+  const fetchAllData = async () => {
+    let critical = 0;
+    let warning = 0;
+    let sensorFault = 0;
+    let needCalibrate = 0;
+    let warmup = 0;
+
+    for (let page = 1; page <= totalPages; page++) {
+      const criticalItems = historicalData.filter(
+        (item) => item.level === "Critical"
+      ).length;
+      const warningItems = historicalData.filter(
+        (item) => item.level === "Warning"
+      ).length;
+      const sensorFaultItems = historicalData.filter(
+        (item) => item.status === "Sensorfault"
+      ).length;
+
+      const needCalibrateItems = historicalData.filter(
+        (item) => item.status === "Need Calibrate"
+      ).length;
+
+      const warmupItems = historicalData.filter(
+        (item) => item.status === "Warmup"
+      ).length;
+
+      critical += criticalItems;
+      warning += warningItems;
+      sensorFault += sensorFaultItems;
+      needCalibrate += needCalibrateItems;
+      warmup += warmupItems;
+
+      await dispatch(loadHistoricalData(page, 50));
+    }
+
+    console.log(warning);
+
+    setCriticalCount(critical);
+    setWarningCount(warning);
+    setSensorFaultCount(sensorFault);
+    setNeedCalibrateCount(needCalibrate);
+    setWarmupCount(warmup);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="flex flex-col h-full p-4">
@@ -26,7 +102,7 @@ const Dashboard = () => {
             }`}
             onClick={() => setActiveButton("daily")}
           >
-            daily
+            yesterday
           </button>
 
           <button
@@ -66,7 +142,7 @@ const Dashboard = () => {
             <p className="text-base font-normal tracking-wider text-gray-700 capitalize">
               total groups
             </p>
-            <span className="text-4xl font-semibold text-black">5</span>
+            <span className="text-4xl font-semibold text-black">1</span>
           </div>
         </div>
 
@@ -81,7 +157,7 @@ const Dashboard = () => {
             <p className="text-base font-normal tracking-wider text-gray-700 capitalize">
               total gateways
             </p>
-            <span className="text-4xl font-semibold text-black">5</span>
+            <span className="text-4xl font-semibold text-black">1</span>
           </div>
         </div>
 
@@ -96,7 +172,7 @@ const Dashboard = () => {
             <p className="text-base font-normal tracking-wider text-gray-700 capitalize">
               total sensors
             </p>
-            <span className="text-4xl font-semibold text-black">5</span>
+            <span className="text-4xl font-semibold text-black">9</span>
           </div>
         </div>
 
@@ -111,7 +187,7 @@ const Dashboard = () => {
             <p className="text-base font-normal tracking-wider text-gray-700 capitalize">
               device failures
             </p>
-            <span className="text-4xl font-semibold text-black">5</span>
+            <span className="text-4xl font-semibold text-black">0</span>
           </div>
         </div>
 
@@ -126,7 +202,7 @@ const Dashboard = () => {
             <p className="text-base font-normal tracking-wider text-gray-700 capitalize">
               sensor alarms
             </p>
-            <span className="text-4xl font-semibold text-black">5</span>
+            <span className="text-4xl font-semibold text-black">55</span>
           </div>
         </div>
       </div>
@@ -143,10 +219,10 @@ const Dashboard = () => {
 
         <section className="flex flex-col col-span-3 gap-4">
           <div className="h-full p-4 bg-white rounded-md shadow-md">
-            <DoughnutChart />
+            <DoughnutChart title="Sensor Alarms" data={SensorData} />
           </div>
           <div className="h-full p-4 bg-white rounded-md shadow-md">
-            <DoughnutChart />
+            <DoughnutChart title="Device Failures Alarms" data={DeviceData} />
           </div>
         </section>
 

@@ -7,7 +7,7 @@ const BottomBar = () => {
         DGM : <span>Administrator</span>
       </div>
       <div className="text-sm tracking-wide">
-        Last Data Received : <span>2014:10:20</span>
+        Last Data Received : <span>2014:10:24</span>
       </div>
     </div>
   );

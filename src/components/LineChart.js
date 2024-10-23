@@ -26,7 +26,7 @@ export const options = {
   plugins: {
     title: {
       display: true,
-      text: "Hourly Alarm Count", // Updated title
+      text: "", // Updated title
     },
     legend: {
       display: false, // Hiding the legend, tooltip will show alarm breakdown

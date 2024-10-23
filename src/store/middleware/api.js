@@ -17,7 +17,7 @@ const api =
       const token = state.auth.token;
 
       const config = {
-        baseURL: "http://localhost:5000/api/v1",
+        baseURL: "http://192.168.29.179:5000/api/v1",
         url,
         method,
         data,
@@ -29,7 +29,19 @@ const api =
 
       const response = await axios.request(config);
 
-      dispatch({ type: onSuccess, payload: response.data });
+      const pagination = response.headers.pagination
+        ? JSON.parse(response.headers.pagination)
+        : {
+            currentPage: 1,
+            itemsPerPage: 10,
+            totalItems: 0,
+            totalPages: 0,
+          };
+
+      dispatch({
+        type: onSuccess,
+        payload: { data: response.data, pagination },
+      });
     } catch (error) {
       if (onError) {
         dispatch({ type: onError, payload: { error: error.message } });

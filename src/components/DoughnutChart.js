@@ -32,27 +32,26 @@ export const options = {
 };
 
 // Sample alarm data for critical and warning alarms
-const data = {
-  labels: ["Critical Alarms", "Warning Alarms"], // Labels for the doughnut chart
-  datasets: [
-    {
-      label: "Alarm Count",
-      data: [45, 30], // Example data: 45 critical alarms, 30 warning alarms
-      backgroundColor: ["#4CADAD", "#99D0D0", "rgba(153, 208, 208, 0.22)"], // Colors for the segments
-      borderColor: ["#008B8A"],
-      borderWidth: 1,
-      cutout: "70%",
-    },
-  ],
-};
+// const data = {
+//   labels: ["Critical Alarms", "Warning Alarms"], // Labels for the doughnut chart
+//   datasets: [
+//     {
+//       label: "Alarm Count",
+//       data: [45, 30], // Example data: 45 critical alarms, 30 warning alarms
+//       backgroundColor: ["#4CADAD", "#99D0D0", "rgba(153, 208, 208, 0.22)"], // Colors for the segments
+//       borderColor: ["#008B8A"],
+//       borderWidth: 1,
+//       cutout: "70%",
+//     },
+//   ],
+// };
 
-const DoughnutChart = () => {
+const DoughnutChart = ({ title, data }) => {
   return (
     <div className="text-sm font-medium tracking-wider text-gray-700 capitalize ">
-      <p className="pb-5">Sensor Alarm</p>
+      <p className="pb-5">{title}</p>
       <div className="h-52">
-        <Doughnut options={options} data={data} />{" "}
-        {/* Pass the data prop here */}
+        <Doughnut options={options} data={data} />
       </div>
     </div>
   );
