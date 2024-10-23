@@ -38,9 +38,10 @@ const data = {
     {
       label: "Alarm Count",
       data: [45, 30], // Example data: 45 critical alarms, 30 warning alarms
-      backgroundColor: ["rgba(255, 99, 132, 0.6)", "rgba(54, 162, 235, 0.6)"], // Colors for the segments
-      borderColor: ["rgba(255, 99, 132, 1)", "rgba(54, 162, 235, 1)"],
+      backgroundColor: ["#4CADAD", "#99D0D0", "rgba(153, 208, 208, 0.22)"], // Colors for the segments
+      borderColor: ["#008B8A"],
       borderWidth: 1,
+      cutout: "70%",
     },
   ],
 };
