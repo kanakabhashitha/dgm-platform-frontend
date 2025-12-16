@@ -7,9 +7,11 @@ import {
   Reports,
   GroupManagement,
   RealTimeMonitoring,
+  GatewayManagement,
 } from "./pages/dashboard/index";
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/ProtectedRoute";
+import { GlobalAlertPopup } from "./components/index";
 
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
+              {/* <GlobalAlertPopup /> */}
               <SharedLayout />
             </ProtectedRoute>
           }
@@ -28,6 +31,7 @@ function App() {
           <Route path="alarms" element={<Alarms />} />
           <Route path="reports" element={<Reports />} />
           <Route path="group-management" element={<GroupManagement />} />
+          <Route path="gateway-management" element={<GatewayManagement />} />
         </Route>
         <Route path="login" element={<Login />} />
       </Routes>

@@ -2,13 +2,11 @@ import { createSlice } from "@reduxjs/toolkit";
 import { apiCallBegan } from "./api";
 
 const storedUser = JSON.parse(localStorage.getItem("user")) || null;
-const storedToken = storedUser ? storedUser.token : null;
 
 const initialState = {
   loading: false,
   error: null,
   user: storedUser,
-  token: storedToken,
 };
 
 const authSlice = createSlice({
@@ -27,8 +25,8 @@ const authSlice = createSlice({
 
     loginUser: (state, action) => {
       const userData = action.payload;
+
       state.user = userData;
-      state.token = userData.token;
       state.loading = false;
       state.error = null;
 
@@ -37,7 +35,6 @@ const authSlice = createSlice({
 
     logoutUser: (state) => {
       state.user = null;
-      state.token = null;
       state.loading = false;
       state.error = null;
 
@@ -48,10 +45,11 @@ const authSlice = createSlice({
 
 export const { apiRequested, apiRequestFailed, loginUser, logoutUser } =
   authSlice.actions;
+
 export default authSlice.reducer;
 
-// API call for user login
-const url = "/user";
+const url = "/auth";
+
 export const userLogin = (credentials) =>
   apiCallBegan({
     url: `${url}/login`,

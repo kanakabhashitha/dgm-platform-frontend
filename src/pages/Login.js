@@ -13,17 +13,17 @@ const Login = () => {
 
   const { loading, error, user } = useSelector((state) => state.auth);
 
-  const [email, setEmail] = useState("");
+  const [userNameOrEmail, setUserNameOrEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!userNameOrEmail || !password) {
       alert("Email and Password are required");
       return;
     }
 
-    dispatch(userLogin({ email, password }));
+    dispatch(userLogin({ userNameOrEmail, password }));
   };
 
   useEffect(() => {
@@ -65,11 +65,11 @@ const Login = () => {
                 </span>
               </div>
               <input
-                type="email"
+                type="text"
                 placeholder="Enter user name or email"
                 className="block w-full bg-transparent rounded-md border-0 py-1.5 pl-9 text-white ring-1 ring-inset tracking-wider ring-white placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={userNameOrEmail}
+                onChange={(e) => setUserNameOrEmail(e.target.value)}
               />
             </div>
           </div>

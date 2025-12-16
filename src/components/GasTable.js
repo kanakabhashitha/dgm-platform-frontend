@@ -1,4 +1,5 @@
 import React from "react";
+import moment from "moment";
 
 const GasTable = ({ data }) => {
   return (
@@ -28,7 +29,9 @@ const GasTable = ({ data }) => {
             <td>{sensor.status || "N/A"}</td>
             <td>{sensor.level || "N/A"}</td>
             <td>{sensor.value || "N/A"}</td>
-            <td>{new Date(sensor.timestamp).toLocaleString() || "N/A"}</td>
+            <td>
+              {moment(sensor.timestamp).format("MMMM Do YYYY, h:mm a") || "N/A"}
+            </td>
             <td className="p-2">
               <button className="px-2 py-0.5 text-sm capitalize tracking-wider text-white bg-cyan-md border border-cyan rounded-sm  hover:bg-cyan transition-transform duration-300 transform ">
                 info

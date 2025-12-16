@@ -4,6 +4,7 @@ import RealTimeMonitoring from "./RealTimeMonitoring";
 import Alarms from "./Alarms";
 import Reports from "./Reports";
 import GroupManagement from "./GroupManagement";
+import GatewayManagement from "./GatewayManagement";
 
 export {
   SharedLayout,
@@ -12,4 +13,5 @@ export {
   Alarms,
   Reports,
   GroupManagement,
+  GatewayManagement,
 };

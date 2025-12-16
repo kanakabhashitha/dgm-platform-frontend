@@ -2,7 +2,7 @@ import axios from "axios";
 import { apiCallBegan } from "../api";
 
 const api =
-  ({ dispatch, getState }) =>
+  ({ dispatch }) =>
   (next) =>
   async (action) => {
     if (action.type !== apiCallBegan.type) return next(action);
@@ -13,40 +13,30 @@ const api =
     if (onStart) dispatch({ type: onStart });
 
     try {
-      const state = getState();
-      const token = state.auth.token;
-
-      const config = {
-        baseURL: "http://192.168.29.179:5000/api/v1",
+      const response = await axios.request({
+        baseURL: "http://localhost:5000/api/v1",
         url,
         method,
         data,
-        headers: {
-          ...headers,
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      };
-
-      const response = await axios.request(config);
-
-      const pagination = response.headers.pagination
-        ? JSON.parse(response.headers.pagination)
-        : {
-            currentPage: 1,
-            itemsPerPage: 10,
-            totalItems: 0,
-            totalPages: 0,
-          };
+        withCredentials: true,
+        headers,
+      });
 
       dispatch({
         type: onSuccess,
-        payload: { data: response.data, pagination },
+        payload: response.data,
       });
     } catch (error) {
-      if (onError) {
-        dispatch({ type: onError, payload: { error: error.message } });
-      }
-      dispatch({ type: "SHOW_ERROR", payload: { error: error.message } });
+      if (onError)
+        dispatch({
+          type: onError,
+          payload: { error: error?.response?.data || error.message },
+        });
+
+      dispatch({
+        type: "SHOW_ERROR",
+        payload: { error: error?.response?.data || error.message },
+      });
     }
   };
 

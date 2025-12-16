@@ -10,6 +10,7 @@ const initialState = {
   itemsPerPage: 10,
   totalItems: 0,
   totalPages: 0,
+  selectedGatewaysFromTreeView: [],
 };
 
 const deviceDataSlice = createSlice({
@@ -24,11 +25,18 @@ const deviceDataSlice = createSlice({
       state.loading = false;
       state.error = action.payload.error;
     },
+    // getRealTimeData: (state, action) => {
+    //   state.realTimeData = action.payload.data;
+    //   state.loading = false;
+    //   state.error = null;
+    // },
     getRealTimeData: (state, action) => {
-      state.realTimeData = action.payload.data;
+      const org = action.payload.data;
+      state.realTimeData = Array.isArray(org) ? org : [org];
       state.loading = false;
       state.error = null;
     },
+
     getHistoricalData: (state, action) => {
       state.historicalData = action.payload.data;
       state.currentPage = action.payload.pagination.currentPage;
@@ -38,6 +46,9 @@ const deviceDataSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    setSelectedGatewaysToTreeView: (state, action) => {
+      state.selectedGatewaysFromTreeView = action.payload;
+    },
   },
 });
 
@@ -46,6 +57,7 @@ export const {
   apiRequestFailed,
   getRealTimeData,
   getHistoricalData,
+  setSelectedGatewaysToTreeView,
 } = deviceDataSlice.actions;
 export default deviceDataSlice.reducer;
 

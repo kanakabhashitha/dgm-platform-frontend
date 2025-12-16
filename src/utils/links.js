@@ -13,26 +13,26 @@ import { RiBaseStationLine } from "react-icons/ri";
 
 const links = [
   {
-    id: 1,
+    id: 0,
     text: "Groups",
     icon: <VscGroupByRefType />,
     content: <Groups />,
   },
   {
-    id: 2,
+    id: 1,
     text: "Add Groups",
     icon: <MdOutlineLibraryAdd />,
     content: <AddGroups />,
   },
   {
-    id: 3,
+    id: 2,
     text: "Gateways",
     icon: <RiBaseStationLine />,
     content: <Gateways />,
   },
   {
-    id: 4,
-    text: "Add Gateways",
+    id: 3,
+    text: "Assign Gateways",
     icon: <MdOutlineLibraryAdd />,
     content: <AddGateways />,
   },
