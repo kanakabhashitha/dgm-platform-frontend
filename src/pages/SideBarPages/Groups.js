@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 
@@ -13,71 +13,25 @@ import {
   Alert,
   CustomModel,
   CustomInput,
+  ConfirmationModel,
 } from "../../components";
 
 function Groups() {
   const dispatch = useDispatch();
 
-  // ----- groups list state -----
-  const {
-    data: groups,
-    pagination,
-    status,
-    error,
-  } = useSelector((state) => state.group.list);
+  // -------------------- REDUX STATE --------------------
+  const { data, pagination, status, error } = useSelector(
+    (state) => state.group.list
+  );
+  const { status: updateStatus } = useSelector((state) => state.group.update);
+  const { status: deleteStatus } = useSelector((state) => state.group.remove);
+
+  const { isViewModelOpen, isConfirmationModelOpen, selectedItem, mode } =
+    useSelector((state) => state.modelToggler);
+
   const loading = status === "loading";
 
-  // ----- modal state from toggle slice -----
-  const { isViewModelOpen, selectedItem, mode } = useSelector(
-    (state) => state.modelToggler
-  );
-
-  // ----- update slice to observe results -----
-  const { status: updateStatus, error: updateError } = useSelector(
-    (state) => state.group.update
-  );
-
-  // ----- local form state (only for edit mode) -----
-  const [form, setForm] = useState({
-    groupName: "",
-    latitude: "",
-    longitude: "",
-    isActive: false,
-  });
-
-  // When edit modal opens, seed form from selectedItem
-  useEffect(() => {
-    if (mode === "edit" && selectedItem) {
-      setForm({
-        groupName: selectedItem.groupName ?? "",
-        latitude: selectedItem.latitude ?? "",
-        longitude: selectedItem.longitude ?? "",
-        isActive:
-          typeof selectedItem.isActive === "boolean"
-            ? selectedItem.isActive
-            : selectedItem.isActive === "true",
-      });
-    }
-    if (mode === "view") {
-      // reset local form when switching to view
-      setForm({
-        groupName: "",
-        latitude: "",
-        longitude: "",
-        isActive: false,
-      });
-    }
-  }, [mode, selectedItem]);
-
-  // When update is successful, close modal and reset update status
-  useEffect(() => {
-    if (updateStatus === "success") {
-      dispatch(closeViewModel());
-      dispatch(resetUpdateStatus());
-    }
-  }, [updateStatus, dispatch]);
-
-  // ----- Filters -----
+  // -------------------- FILTER STATE --------------------
   const [uiFilter, setUiFilter] = useState({
     groupName: "",
     organizationName: "",
@@ -92,10 +46,16 @@ function Groups() {
     isActive: "",
   });
 
-  const handleChange = (name, value) =>
-    setUiFilter((prev) => ({ ...prev, [name]: value }));
+  // -------------------- FORM STATE --------------------
+  const [form, setForm] = useState({
+    groupName: "",
+    latitude: "",
+    longitude: "",
+    isActive: false,
+  });
 
-  useEffect(() => {
+  // -------------------- HELPERS --------------------
+  const buildParams = useCallback(() => {
     const params = {
       pageNumber: apiFilter.pageNumber,
       pageSize: apiFilter.pageSize,
@@ -109,86 +69,64 @@ function Groups() {
     if (apiFilter.isActive !== "")
       params.isActive = apiFilter.isActive === "true";
 
-    dispatch(loadGroups(params));
-  }, [apiFilter, dispatch]);
+    return params;
+  }, [apiFilter]);
+
+  const reloadGroups = useCallback(() => {
+    dispatch(loadGroups(buildParams()));
+  }, [dispatch, buildParams]);
+
+  // -------------------- EFFECTS --------------------
+  useEffect(() => {
+    reloadGroups();
+  }, [reloadGroups]);
+
+  useEffect(() => {
+    if (updateStatus === "success") {
+      dispatch(closeViewModel());
+      dispatch(resetUpdateStatus());
+      reloadGroups();
+    }
+  }, [updateStatus, dispatch, reloadGroups]);
+
+  useEffect(() => {
+    if (deleteStatus === "success") {
+      reloadGroups();
+    }
+  }, [deleteStatus, reloadGroups]);
+
+  useEffect(() => {
+    if (mode === "edit" && selectedItem) {
+      setForm({
+        groupName: selectedItem.groupName ?? "",
+        latitude: selectedItem.latitude ?? "",
+        longitude: selectedItem.longitude ?? "",
+        isActive:
+          typeof selectedItem.isActive === "boolean"
+            ? selectedItem.isActive
+            : selectedItem.isActive === "true",
+      });
+    }
+  }, [mode, selectedItem]);
+
+  // -------------------- HANDLERS --------------------
+  const handleEditChange = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
   const applyFilter = () => {
     setApiFilter((prev) => ({
       ...prev,
       pageNumber: 0,
-      groupName: uiFilter.groupName,
-      organizationName: uiFilter.organizationName,
-      isActive: uiFilter.isActive,
+      ...uiFilter,
     }));
   };
 
-  const handlePageChange = (page) => {
-    setApiFilter((prev) => ({ ...prev, pageNumber: page }));
-  };
-
-  // ----- Table columns -----
-  const columns = useMemo(
-    () => [
-      { label: "Group Name", accessor: "groupName" },
-      { label: "Organization Name", accessor: "organizationName" },
-      { label: "Latitude", accessor: "latitude" },
-      { label: "Longitude", accessor: "longitude" },
-      {
-        label: "Status",
-        accessor: (row) => (row.isActive ? "Active" : "Inactive"),
-      },
-      {
-        label: "Created Date",
-        accessor: (row) => moment(row.createdAt).format("MMM Do YYYY, h:mm a"),
-      },
-      {
-        label: "Updated Date",
-        accessor: (row) => moment(row.updatedAt).format("MMM Do YYYY, h:mm a"),
-      },
-    ],
-    []
-  );
-
-  // ----- FilterBar fields -----
-  const filterFields = [
-    {
-      name: "groupName",
-      label: "Group Name",
-      placeholder: "group name",
-      value: uiFilter.groupName,
-      onChange: (v) => handleChange("groupName", v),
-    },
-    {
-      name: "organizationName",
-      label: "Organization Name",
-      placeholder: "organization name",
-      value: uiFilter.organizationName,
-      onChange: (v) => handleChange("organizationName", v),
-    },
-    {
-      name: "isActive",
-      label: "Status",
-      type: "select",
-      value: uiFilter.isActive,
-      onChange: (v) => handleChange("isActive", v),
-      options: [
-        { label: "-- status --", value: "" },
-        { label: "Active", value: "true" },
-        { label: "Inactive", value: "false" },
-      ],
-    },
-  ];
-
-  // ----- local edit handlers -----
-  const handleEditChange = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Diff and dispatch updateGroup (send only changed fields)
   const handleUpdate = () => {
     if (!selectedItem) return;
 
     const dirty = {};
+
     if (form.groupName !== selectedItem.groupName)
       dirty.groupName = form.groupName;
     if ((form.latitude ?? "") !== (selectedItem.latitude ?? ""))
@@ -211,7 +149,71 @@ function Groups() {
     dispatch(updateGroup(selectedItem.groupId || selectedItem.id, dirty));
   };
 
-  // ----- Build modal fields depending on mode -----
+  // -------------------- ERROR MESSAGE --------------------
+  const errorMessage = useMemo(() => {
+    if (!error) return "";
+
+    if (typeof error === "string") return error;
+
+    if (typeof error === "object") {
+      return error.message || "Something went wrong";
+    }
+
+    return "Unexpected error occurred";
+  }, [error]);
+
+  // -------------------- TABLE --------------------
+  const columns = useMemo(
+    () => [
+      { label: "Group Name", accessor: "groupName" },
+      { label: "Organization Name", accessor: "organizationName" },
+      { label: "Latitude", accessor: "latitude" },
+      { label: "Longitude", accessor: "longitude" },
+      {
+        label: "Status",
+        accessor: (row) => (row.isActive ? "Active" : "Inactive"),
+      },
+      {
+        label: "Created Date",
+        accessor: (row) => moment(row.createdAt).format("MMM Do YYYY, h:mm a"),
+      },
+      {
+        label: "Updated Date",
+        accessor: (row) => moment(row.updatedAt).format("MMM Do YYYY, h:mm a"),
+      },
+    ],
+    []
+  );
+
+  // -------------------- FILTER BAR --------------------
+  const filterFields = [
+    {
+      name: "groupName",
+      label: "Group Name",
+      value: uiFilter.groupName,
+      onChange: (v) => setUiFilter((p) => ({ ...p, groupName: v })),
+    },
+    {
+      name: "organizationName",
+      label: "Organization Name",
+      value: uiFilter.organizationName,
+      onChange: (v) => setUiFilter((p) => ({ ...p, organizationName: v })),
+    },
+    {
+      name: "isActive",
+      label: "Status",
+      type: "select",
+      value: uiFilter.isActive,
+      onChange: (v) => setUiFilter((p) => ({ ...p, isActive: v })),
+      options: [
+        { label: "-- status --", value: "" },
+        { label: "Active", value: "true" },
+        { label: "Inactive", value: "false" },
+      ],
+    },
+  ];
+
+  // -------------------- MODAL FIELDS (YOUR VERSION) --------------------
   const modelFields =
     mode === "view"
       ? [
@@ -259,17 +261,12 @@ function Groups() {
             component: CustomInput,
             props: {
               label: "Active Status",
-              value: selectedItem
-                ? selectedItem.isActive
-                  ? "Active"
-                  : "Inactive"
-                : "",
+              value: selectedItem?.isActive ? "Active" : "Inactive",
               inputWidth: "w-full",
               labelWidth: "w-56",
               isDisable: true,
             },
           },
-
           {
             component: CustomInput,
             props: {
@@ -303,7 +300,6 @@ function Groups() {
               value: form.groupName,
               inputWidth: "w-full",
               labelWidth: "w-56",
-              isDisable: false,
               onChange: (v) => handleEditChange("groupName", v),
             },
           },
@@ -314,7 +310,6 @@ function Groups() {
               value: form.latitude,
               inputWidth: "w-full",
               labelWidth: "w-56",
-              isDisable: false,
               onChange: (v) => handleEditChange("latitude", v),
             },
           },
@@ -325,7 +320,6 @@ function Groups() {
               value: form.longitude,
               inputWidth: "w-full",
               labelWidth: "w-56",
-              isDisable: false,
               onChange: (v) => handleEditChange("longitude", v),
             },
           },
@@ -335,7 +329,7 @@ function Groups() {
               label: "Active Status",
               isSelect: true,
               value: form.isActive ? "ACTIVE" : "INACTIVE",
-              onChange: (val) => handleEditChange("isActive", val === "ACTIVE"),
+              onChange: (v) => handleEditChange("isActive", v === "ACTIVE"),
               inputWidth: "w-full",
               labelWidth: "w-56",
               options: [
@@ -368,6 +362,7 @@ function Groups() {
           },
         ];
 
+  // -------------------- RENDER --------------------
   return (
     <div className="flex flex-col gap-5 relative">
       {isViewModelOpen && (
@@ -378,46 +373,39 @@ function Groups() {
         />
       )}
 
+      {isConfirmationModelOpen && <ConfirmationModel />}
+
       <FilterBar fields={filterFields} onFilter={applyFilter} />
 
       <div className="p-4 bg-white shadow-md relative">
         {loading && <Loader />}
 
-        {error && !loading ? (
-          <Alert type="info" message={error.message || error} />
+        {errorMessage && !loading ? (
+          <Alert type="error" message={errorMessage} />
         ) : (
-          <div>
+          <>
             <DataTable
               columns={columns}
-              data={groups || []}
-              pagination={pagination}
-              loading={loading}
-              onPageChange={handlePageChange}
-              isShowActionSection={true}
-              isShowViewBtn={true}
-              isShowEditBtn={true}
-              isShowDeleteBtn={true}
+              data={data || []}
+              isShowActionSection
+              isShowViewBtn
+              isShowEditBtn
+              isShowDeleteBtn
             />
 
-            <div className="">
-              <PaginationBar
-                pageNumber={pagination?.pageNumber || 0}
-                pageSize={apiFilter.pageSize}
-                totalPages={pagination?.totalPages || 1}
-                totalElements={pagination?.totalElements || 0}
-                onPageChange={(page) =>
-                  setApiFilter((prev) => ({ ...prev, pageNumber: page }))
-                }
-                onPageSizeChange={(size) =>
-                  setApiFilter((prev) => ({
-                    ...prev,
-                    pageSize: size,
-                    pageNumber: 0,
-                  }))
-                }
-              />
-            </div>
-          </div>
+            <PaginationBar
+              pageNumber={pagination.pageNumber}
+              pageSize={apiFilter.pageSize}
+              totalPages={pagination.totalPages}
+              totalElements={pagination.totalElements}
+              onPageChange={(page) =>
+                setApiFilter((p) => ({ ...p, pageNumber: page }))
+              }
+              onPageSizeChange={(size) =>
+                setApiFilter({ ...apiFilter, pageSize: size, pageNumber: 0 })
+              }
+            />
+          </>
         )}
       </div>
     </div>

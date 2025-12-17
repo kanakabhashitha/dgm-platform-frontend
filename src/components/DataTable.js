@@ -2,7 +2,11 @@ import { AiOutlineEdit } from "react-icons/ai";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { GrView } from "react-icons/gr";
 import { useDispatch } from "react-redux";
-import { openViewModel, openEditModel } from "../store/toggle";
+import {
+  openViewModel,
+  openEditModel,
+  openConfirmationModel,
+} from "../store/toggle";
 
 function DataTable({
   columns,
@@ -55,7 +59,10 @@ function DataTable({
                   </button>
                 )}
                 {isShowDeleteBtn && (
-                  <button className="p-1 text-base text-white bg-red-500 border border-red-600 rounded-sm hover:text-black">
+                  <button
+                    onClick={() => dispatch(openConfirmationModel(row))}
+                    className="p-1 text-base text-white bg-red-500 border border-red-600 rounded-sm hover:text-black"
+                  >
                     <MdOutlineDeleteOutline />
                   </button>
                 )}

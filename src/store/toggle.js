@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   isViewModelOpen: false,
+  isConfirmationModelOpen: false,
   selectedItem: null,
   mode: "view",
 };
@@ -25,9 +26,25 @@ const toggleSlice = createSlice({
       state.selectedItem = null;
       state.mode = "view";
     },
+    openConfirmationModel: (state, action) => {
+      state.isConfirmationModelOpen = true;
+      state.selectedItem = action.payload;
+      state.mode = "view";
+    },
+
+    closeConfirmationModel: (state) => {
+      state.isConfirmationModelOpen = false;
+      state.selectedItem = null;
+      state.mode = "view";
+    },
   },
 });
 
-export const { openViewModel, openEditModel, closeViewModel } =
-  toggleSlice.actions;
+export const {
+  openViewModel,
+  openEditModel,
+  closeViewModel,
+  openConfirmationModel,
+  closeConfirmationModel,
+} = toggleSlice.actions;
 export default toggleSlice.reducer;
