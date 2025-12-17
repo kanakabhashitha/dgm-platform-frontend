@@ -32,7 +32,7 @@ const NavBar = () => {
   }, [pathname]);
 
   return (
-    <nav className="p-5 bg-cyan">
+    <nav className="p-5 bg-cyan z-50">
       <div className="flex items-center justify-between mx-auto">
         <div className="flex items-center gap-10">
           <img

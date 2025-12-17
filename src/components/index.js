@@ -16,6 +16,7 @@ import Alert from "./Alert";
 import CustomInput from "./CustomInput";
 import CustomButton from "./CustomButton";
 import CustomModel from "./CustomModel";
+import ConfirmationModel from "./ConfirmationModel";
 
 export {
   NavBar,
@@ -36,4 +37,5 @@ export {
   CustomInput,
   CustomButton,
   CustomModel,
+  ConfirmationModel,
 };
